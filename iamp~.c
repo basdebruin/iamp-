@@ -74,20 +74,8 @@ t_sample allpass(t_sample input, t_sample coeff, unsigned int buffer_index) {
 
   // SETUP
   // creating static array of buffers for each allpass filter
-  // buffers are 3 samples, 4th sample is for the index of that buffer
-  static t_sample[8][4] xbuffer = {
-    { 0.0, 0.0, 0.0, 0.0 },
-    { 0.0, 0.0, 0.0, 0.0 },
-    { 0.0, 0.0, 0.0, 0.0 },
-    { 0.0, 0.0, 0.0, 0.0 },
-
-    { 0.0, 0.0, 0.0, 0.0 },
-    { 0.0, 0.0, 0.0, 0.0 },
-    { 0.0, 0.0, 0.0, 0.0 },
-    { 0.0, 0.0, 0.0, 0.0 }
-  }
-  // y buffer only needs 3 buffer values, index is the same as xbuffer
-  static t_sample[8][3] ybuffer = {
+  // buffers are 3 samples
+  static t_sample xbuffer[8][3] = {
     { 0.0, 0.0, 0.0 },
     { 0.0, 0.0, 0.0 },
     { 0.0, 0.0, 0.0 },
@@ -97,12 +85,26 @@ t_sample allpass(t_sample input, t_sample coeff, unsigned int buffer_index) {
     { 0.0, 0.0, 0.0 },
     { 0.0, 0.0, 0.0 },
     { 0.0, 0.0, 0.0 }
-  }
+  };
+  // y buffer only needs 3 buffer values, index is the same as xbuffer
+  static t_sample ybuffer[8][3] = {
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 },
 
-  // make n point to current buffer index for convenience
-  t_sample* n = bufferx[buffer_index][3];
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 }
+  };
+  // setup buffer index array
+  static int buffer_indices[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+  // make n equ current buffer index for convenience
+  int n = buffer_indices[buffer_index];
   // increment buffer
-  n = (n + 1) % 3;
+  buffer_indices[buffer_index] = ( n + 1 ) % 3;
   
   // set buffers
   xbuffer[buffer_index][n] =  input;
@@ -162,10 +164,10 @@ t_sample allpass_1(t_sample input) {
 t_sample allpass_2(t_sample input) {
   
   // run through all pass filters, storing signal in sig variable
-  t_sample sig = allpass(input, 0.4021921162426, 0);
-           sig = allpass(sig,   0.4021921162426, 1);
-           sig = allpass(sig,   0.9722909545651, 2);
-           sig = allpass(sig,   0.9952884791278, 3);
+  t_sample sig = allpass(input, 0.4021921162426, 4);
+           sig = allpass(sig,   0.4021921162426, 5);
+           sig = allpass(sig,   0.9722909545651, 6);
+           sig = allpass(sig,   0.9952884791278, 7);
 
   return sig;
   
