@@ -49,7 +49,7 @@ typedef struct _instant_amp {
 
 
 /* wrap function used by perform function */
-inline unsigned int wrap(int in, unsigned int max) {
+unsigned int wrap(int in, unsigned int max) {
     if (in >= 0) {
         return in % max;
     } else {
@@ -58,67 +58,117 @@ inline unsigned int wrap(int in, unsigned int max) {
 }
 
 
-// basic allpass filter building block
-#define AP(a) ((a*a)*(xbuffer[n] + ybuffer[wrap(n-2, 3)]) - xbuffer[wrap(n-2, 3)])
-
 /*
 
-  The first allpass filter, doesn't change the phase
+  ALLPASS FUNCTION
+  takes: 
+    input sample
+    coefficient for current allpass filter
+    buffer index for which buffer to use
+
+  returns one allpassed signal
 
 */
-t_sample allpass_1(t_sample input) {
+
+t_sample allpass(t_sample input, t_sample coeff, unsigned int buffer_index) {
+
   // SETUP
-  // buffers for x and y 
-  static t_sample xbuffer[3] = { 0.0, 0.0, 0.0 };
-  static t_sample ybuffer[3] = { 0.0, 0.0, 0.0 };
+  // creating static array of buffers for each allpass filter
+  // buffers are 3 samples, 4th sample is for the index of that buffer
+  static t_sample[8][4] xbuffer = {
+    { 0.0, 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0, 0.0 },
 
-  // index
-  static unsigned int n = 0;
+    { 0.0, 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0, 0.0 }
+  }
+  // y buffer only needs 3 buffer values, index is the same as xbuffer
+  static t_sample[8][3] ybuffer = {
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 },
 
-  // calc the allpass
-  const t_sample out = AP(0.6923878) * AP(0.9360654322959) * AP(0.9882295226860) * AP(0.9987488452737);
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 },
+    { 0.0, 0.0, 0.0 }
+  }
 
-  //increment buffer after calculating for 1sample delay
-
+  // make n point to current buffer index for convenience
+  t_sample* n = bufferx[buffer_index][3];
   // increment buffer
   n = (n + 1) % 3;
   
   // set buffers
-  xbuffer[n] = input;
-  ybuffer[n] = input + out;
+  xbuffer[buffer_index][n] =  input;
+
+  // calc the allpass
+  const t_sample out = (
+    ( coeff * coeff ) *
+    ( xbuffer[buffer_index][n] + 
+      ybuffer[buffer_index][wrap( n-2, 3 )] ) - 
+    xbuffer[buffer_index][wrap( n-2, 3 )]
+  );
+
+  ybuffer[buffer_index][n] = out;
 
   // return
   return out;
+
+}
+
+/*  
+    Delays by one sample, nice and easy
+*/
+t_sample delay_by_one(t_sample input) {
+
+  // save last
+  static t_sample last_sample = 0.0;
+  // intermediary variable
+  const t_sample temp = last_sample;
+  // set last_sample for next time
+  last_sample = input;
+  // and return the temp
+  return temp;
+
 }
 
 /*
-
-  The second allpass filter, flips the phase 90°
-
+  First allpass function, uses allpass() and doesn't flip phase
 */
-t_sample allpass_2(t_sample input) {
-  // SETUP
-  // buffers for x and y
-  static t_sample xbuffer[3] = { 0.0, 0.0, 0.0 };
-  static t_sample ybuffer[3] = { 0.0, 0.0, 0.0 };
 
-  // index
-  static unsigned int n = 0;
+t_sample allpass_1(t_sample input) {
 
-  // increment buffer
-  n = (n + 1) % 3;
+  // run through all pass filters, storing signal in sig variable
+  t_sample sig = allpass(input, 0.6923878000000, 0);
+           sig = allpass(sig,   0.9360654322959, 1);
+           sig = allpass(sig,   0.9882295226860, 2);
+           sig = allpass(sig,   0.9987488452737, 3);
+           sig = delay_by_one(sig);
+
+  return sig;
   
-  // set buffers
-  xbuffer[n] = input;
-  ybuffer[n] += input;
+}
 
-  // calc the allpass
-  const t_sample out = AP(0.4021921162426) * AP(0.8561710882420) * AP(0.9722909545651) * AP(0.9952884791278);
+/*
+  Second allpass function, uses allpass() and flips phase 90°
+*/
 
-  ybuffer[n] = out;
+t_sample allpass_2(t_sample input) {
+  
+  // run through all pass filters, storing signal in sig variable
+  t_sample sig = allpass(input, 0.4021921162426, 0);
+           sig = allpass(sig,   0.4021921162426, 1);
+           sig = allpass(sig,   0.9722909545651, 2);
+           sig = allpass(sig,   0.9952884791278, 3);
 
-  // return
-  return out;
+  return sig;
+  
 }
 
 
