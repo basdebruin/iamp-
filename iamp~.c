@@ -105,6 +105,7 @@ t_sample allpass(t_sample input, t_sample coeff, unsigned int buffer_index) {
   int n = buffer_indices[buffer_index];
   // increment buffer
   buffer_indices[buffer_index] = ( n + 1 ) % 3;
+  n = buffer_indices[buffer_index]
   
   // set buffers
   xbuffer[buffer_index][n] =  input;
@@ -119,7 +120,6 @@ t_sample allpass(t_sample input, t_sample coeff, unsigned int buffer_index) {
 
   ybuffer[buffer_index][n] = out;
 
-  // return
   return out;
 
 }
