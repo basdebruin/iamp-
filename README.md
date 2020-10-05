@@ -5,8 +5,8 @@
 See `iamp~.c` for external code
 
 Based on concepts and coefficients from the following articles: 
-* [http://yehar.com/blog/?p=368]()
-* [http://www.katjaas.nl/hilbert/hilbert.html]()
+* [http://yehar.com/blog/?p=368](http://yehar.com/blog/?p=368)
+* [http://www.katjaas.nl/hilbert/hilbert.html](http://www.katjaas.nl/hilbert/hilbert.html)
 
 
 ## Diagram
