@@ -173,6 +173,13 @@ t_sample allpass_2(t_sample input) {
   
 }
 
+/*
+  Simple absolute function that works with t_samples
+*/
+t_sample t_abs(t_sample in) {
+  return (in < 0.0 ? -in : in);
+}
+
 
 /**
  * this is the core of the object
@@ -210,7 +217,7 @@ t_int *instant_amp_perform(t_int *w)
     t_sample ap2 = allpass_2(in[s]);
 
     // AMPLITUDE!
-    out[s] = 0.5*(ap1+ap2);
+    out[s] = 0.5 * (t_abs(ap1) + t_abs(ap2));
 
   }
 
