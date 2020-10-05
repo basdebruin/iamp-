@@ -48,7 +48,7 @@ typedef struct _instant_amp {
 } t_instant_amp;
 
 
-/* wrap function used by perform function */
+/* wrap function used by allpass */
 unsigned int wrap(int in, unsigned int max) {
     if (in >= 0) {
         return in % max;
@@ -101,16 +101,16 @@ t_sample allpass(t_sample input, t_sample coeff, unsigned int buffer_index) {
   // setup buffer index array
   static int buffer_indices[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-  // make n equ current buffer index for convenience
-  int n = buffer_indices[buffer_index];
   // increment buffer
-  buffer_indices[buffer_index] = ( n + 1 ) % 3;
-  n = buffer_indices[buffer_index]
+  buffer_indices[buffer_index] = ( buffer_indices[buffer_index] + 1 ) % 3;
+  // make n equ current buffer index for convenience
+  const int n = buffer_indices[buffer_index];
   
   // set buffers
   xbuffer[buffer_index][n] =  input;
 
   // calc the allpass
+  // out(t) = a^2*(in(t) + out(t-2)) - in(t-2)
   const t_sample out = (
     ( coeff * coeff ) *
     ( xbuffer[buffer_index][n] + 
