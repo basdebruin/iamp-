@@ -176,7 +176,7 @@ t_sample allpass_2(t_sample input) {
 /*
   Simple absolute function that works with t_samples
 */
-t_sample t_abs(t_sample in) {
+inline t_sample t_abs(t_sample in) {
   return (in < 0.0 ? -in : in);
 }
 
