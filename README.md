@@ -12,6 +12,6 @@ Based on concepts and coefficients from the following articles:
 ## Diagram
 ``` c
    +->allpass->allpass->allpass->allpass->delay->abs-+ 
-in-|                                                 |->*0.5->out
+in-|                                                 |->*0.5->smooth->out
    +->allpass->allpass->allpass->allpass-------->abs-+ 
 ```
