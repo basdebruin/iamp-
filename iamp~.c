@@ -173,6 +173,26 @@ t_sample allpass_2(t_sample input) {
   
 }
 
+
+/*
+  Smoothing filter
+  Returns the average of the last 3 samples
+*/
+t_sample smooth(t_sample input) {
+
+  // buffer
+  static t_sample buffer[3] = { 0.0, 0.0, 0.0 };
+
+  // index
+  static int n = 0;
+  n = (n + 1) % 3;
+
+  buffer[n] = input;
+
+  return 0.333 * (input + buffer[wrap(n-1, 3)] + buffer[wrap(n-2, 3)]);
+
+}
+
 /*
   Simple absolute function that works with t_samples
 */
@@ -217,7 +237,9 @@ t_int *instant_amp_perform(t_int *w)
     t_sample ap2 = allpass_2(in[s]);
 
     // AMPLITUDE!
-    out[s] = 0.5 * (t_abs(ap1) + t_abs(ap2));
+    // average of both absolute allpass filters
+    // smoothed using the smooth() function
+    out[s] = smooth(0.75 * (t_abs(ap1) + t_abs(ap2)));
 
   }
 
